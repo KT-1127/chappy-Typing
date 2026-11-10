@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>チャッピータイピング</title>
+<meta name="description" content="チャッピーと一緒にりんごを集めながら、タイピングが上達するゲーム。日本語（ローマ字）と英語、技術科の用語にも対応。">
+<meta name="theme-color" content="#cfe9ff">
+<meta property="og:type" content="website">
+<meta property="og:title" content="チャッピータイピング">
+<meta property="og:description" content="チャッピーと一緒にりんごを集めながら、タイピングが上達するゲーム。日本語（ローマ字）と英語、技術科の用語にも対応。">
+<meta property="og:image" content="assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/chappy/apple.webp" type="image/webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/features.css">
+</head>
+<body>
+
+<!-- 背景：3D が使えるときは #scene3d に描く。使えないときは .sky（CSS の空と丘）を表示 -->
+<div class="sky" aria-hidden="true">
+  <div class="sun"></div>
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
+  <svg class="hills" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="hillA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9ecc0"/><stop offset="1" stop-color="#a9dca0"/></linearGradient>
+      <linearGradient id="hillB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b3e2a8"/><stop offset="1" stop-color="#8fcf86"/></linearGradient>
+    </defs>
+    <path fill="url(#hillA)" opacity=".75" d="M0,190 C220,120 380,150 560,170 C760,192 900,110 1100,120 C1260,128 1360,160 1440,150 L1440,320 L0,320 Z"/>
+    <path fill="url(#hillB)" d="M0,250 C180,210 360,230 540,240 C760,252 940,200 1140,214 C1300,226 1380,240 1440,236 L1440,320 L0,320 Z"/>
+  </svg>
+  <div class="floaters"></div>
+</div>
+<div id="scene3d" aria-hidden="true"></div>
+
+<!-- 右上のボタン -->
+<nav class="topbar" aria-label="メニュー">
+  <button class="icon-btn" id="btnWardrobe" type="button" title="きせかえ" aria-label="きせかえ">
+    <svg viewBox="0 0 24 24"><path d="M8.5 3.5 4 6l1.8 4.2L8 9.4V20h8V9.4l2.2.8L20 6l-4.5-2.5a3.5 3.5 0 0 1-7 0Z"/></svg>
+  </button>
+  <button class="icon-btn" id="btnRecords" type="button" title="記録" aria-label="記録">
+    <svg viewBox="0 0 24 24"><path d="M7 4h10v3a5 5 0 0 1-10 0V4Z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3M12 12v4M8 20h8M9.5 16h5"/></svg>
+  </button>
+  <button class="icon-btn" id="btnSettings" type="button" title="設定" aria-label="設定">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+  </button>
+  <button class="icon-btn" id="btnMute" type="button" title="音のオン・オフ" aria-label="音のオン・オフ" aria-pressed="false">
+    <svg class="ico-on" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    <svg class="ico-off" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>
+  </button>
+</nav>
+
+<main id="app">
+
+  <!-- タイトル -->
+  <section class="screen" id="scr-title" aria-labelledby="logoTitle">
+    <div class="title-wrap">
+      <div class="title-chappy" id="titleChappy"></div>
+      <h1 class="logo" id="logoTitle">
+        <span class="logo-ja">チャッピー<em>タイピング</em></span>
+        <span class="logo-en">Chappy Typing</span>
+      </h1>
+      <p class="tagline">りんごを集めながら、気持ちよく上達。<br>日本語（ローマ字）・英語・技術科の用語に対応したタイピングゲームです。</p>
+      <button class="btn btn-primary btn-xl" id="btnStart" type="button">はじめる <kbd>Enter</kbd></button>
+      <p class="title-note">音が出ます。キーボードを使って遊んでください。</p>
+    </div>
+  </section>
+
+  <!-- モード選択 -->
+  <section class="screen" id="scr-modes" aria-labelledby="modesTitle">
+    <div class="modes-wrap">
+      <header class="screen-head">
+        <button class="btn btn-ghost" type="button" data-back>← もどる <kbd>Esc</kbd></button>
+        <h2 id="modesTitle">モードをえらぶ</h2>
+        <span></span>
+      </header>
+      <div class="mode-grid" id="modeGrid" role="radiogroup" aria-label="モード"></div>
+      <div class="modes-bottom">
+        <div class="mode-guide">
+          <div class="mode-chappy" id="modeChappy"></div>
+          <div class="bubble bubble-left" id="modeBubble" aria-live="polite"></div>
+        </div>
+        <div class="glass options">
+          <div class="opt-row" id="rowLang">
+            <span class="opt-label">言語</span>
+            <div class="seg" id="segLang" role="radiogroup" aria-label="言語">
+              <button type="button" data-v="ja">日本語</button>
+              <button type="button" data-v="en">English</button>
+            </div>
+          </div>
+          <div class="opt-row" id="rowDiff">
+            <span class="opt-label">難しさ</span>
+            <div class="seg" id="segDiff" role="radiogroup" aria-label="難しさ">
+              <button type="button" data-v="easy">やさしい</button>
+              <button type="button" data-v="normal">ふつう</button>
+              <button type="button" data-v="hard">むずかしい</button>
+            </div>
+          </div>
+          <div class="opt-row" id="rowField">
+            <span class="opt-label">分野</span>
+            <div class="seg seg-wrap" id="segField" role="radiogroup" aria-label="分野">
+              <button type="button" data-v="all">すべて</button>
+              <button type="button" data-v="material">材料と加工</button>
+              <button type="button" data-v="bio">生物育成</button>
+              <button type="button" data-v="energy">エネルギー変換</button>
+              <button type="button" data-v="info">情報の技術</button>
+            </div>
+          </div>
+          <div class="opt-row" id="rowTime">
+            <span class="opt-label">時間</span>
+            <div class="seg" id="segTime" role="radiogroup" aria-label="時間">
+              <button type="button" data-v="30">30秒</button>
+              <button type="button" data-v="60">60秒</button>
+              <button type="button" data-v="120">2分</button>
+            </div>
+          </div>
+          <p class="opt-best" id="optBest"></p>
+          <div class="opt-actions">
+            <button class="btn btn-soft" id="btnTechList" type="button">用語一覧を見る</button>
+            <button class="btn btn-primary btn-lg" id="btnGo" type="button">スタート <kbd>Enter</kbd></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ステップ練習：レッスン選択 -->
+  <section class="screen" id="scr-steps" aria-labelledby="stepsTitle">
+    <div class="steps-wrap">
+      <header class="screen-head">
+        <button class="btn btn-ghost" type="button" data-back>← もどる <kbd>Esc</kbd></button>
+        <h2 id="stepsTitle">ステップ練習</h2>
+        <div class="seg seg-small" id="segStepLang" role="radiogroup" aria-label="言語">
+          <button type="button" data-v="ja">日本語</button>
+          <button type="button" data-v="en">English</button>
+        </div>
+      </header>
+      <p class="steps-sum" id="stepsSum"></p>
+      <div class="lesson-grid" id="lessonGrid"></div>
+    </div>
+  </section>
+
+  <!-- プレイ -->
+  <section class="screen" id="scr-play" aria-label="プレイ中">
+    <div class="play-wrap">
+      <div class="hud glass">
+        <div class="hud-items" id="hudItems"></div>
+        <div class="hud-bar" id="hudBarBox"><i id="hudBar"></i></div>
+      </div>
+
+      <div class="word-card glass" id="wordCard">
+        <div class="w-display" id="wDisplay"></div>
+        <div class="w-kana" id="wKana"></div>
+        <div class="w-roma" id="wRoma" aria-hidden="true"></div>
+        <div class="w-meaning" id="wMeaning"></div>
+      </div>
+      <p class="w-next" id="wNext"></p>
+      <div class="kb-box" id="kbBox"></div>
+
+      <div class="ime-warn" id="imeWarn" role="alert" hidden>日本語入力（IME）がオンになっているようです。<b>半角英数</b>に切り替えてください。</div>
+    </div>
+    <div class="arena" id="arena"></div>
+    <div class="play-chappy">
+      <div class="bubble bubble-left" id="playBubble" aria-live="polite" hidden></div>
+      <div class="play-chappy-cp" id="playChappy"></div>
+    </div>
+    <p class="play-hint"><kbd>Esc</kbd> やめる</p>
+  </section>
+
+  <!-- 結果 -->
+  <section class="screen" id="scr-result" aria-labelledby="resultTitle">
+    <div class="result-wrap">
+      <div class="glass result-card">
+        <p class="result-mode" id="resMode"></p>
+        <h2 id="resultTitle" class="sr-only">結果</h2>
+        <div class="result-main" id="resMain"></div>
+        <p class="result-badge" id="resBadge" hidden></p>
+        <div class="result-rank"><span class="rank-letter" id="resRank">C</span><span class="rank-title" id="resRankTitle"></span></div>
+        <dl class="result-stats" id="resStats"></dl>
+        <div class="result-weak" id="resWeak"></div>
+        <div class="result-earned" id="resEarned" hidden></div>
+      </div>
+      <div class="result-side">
+        <div class="bubble bubble-bottom" id="resBubble"></div>
+        <div class="result-chappy" id="resultChappy"></div>
+        <div class="result-actions">
+          <button class="btn btn-primary btn-lg" id="btnRetry" type="button">もう一回 <kbd>Enter</kbd></button>
+          <button class="btn btn-primary btn-lg" id="btnNextLesson" type="button" hidden>次のレッスン <kbd>N</kbd></button>
+          <button class="btn btn-soft" id="btnToModes" type="button">モード選択 <kbd>Esc</kbd></button>
+          <button class="btn btn-soft" id="btnToRecords" type="button">記録を見る</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 記録 -->
+  <section class="screen" id="scr-records" aria-labelledby="recordsTitle">
+    <div class="records-wrap">
+      <header class="screen-head">
+        <button class="btn btn-ghost" type="button" data-back>← もどる <kbd>Esc</kbd></button>
+        <h2 id="recordsTitle">記録</h2>
+        <span></span>
+      </header>
+      <div class="rec-totals" id="recTotals"></div>
+      <div class="rec-grid">
+        <div class="glass rec-panel rec-wide">
+          <h3>速さの移り変わり <small>（最近30回・打/分）</small></h3>
+          <div class="chart" id="recChart"></div>
+        </div>
+        <div class="glass rec-panel">
+          <h3>自己ベスト</h3>
+          <div class="seg seg-small rec-tabs" id="recTabs" role="tablist">
+            <button type="button" data-v="rush">ラッシュ</button>
+            <button type="button" data-v="tech">技術科</button>
+            <button type="button" data-v="cannon">キャノン</button>
+            <button type="button" data-v="free">フリー</button>
+          </div>
+          <table class="rec-table" id="recBest"></table>
+        </div>
+        <div class="glass rec-panel">
+          <h3>苦手マップ <small>（ミスした割合）</small></h3>
+          <div id="recHeat" class="heat-box"></div>
+          <p class="rec-note" id="recHeatNote">赤いほどミスが多いキーです。キーにマウスをのせると数字が出ます。</p>
+        </div>
+        <div class="glass rec-panel">
+          <h3>ステップ練習</h3>
+          <div id="recSteps"></div>
+        </div>
+        <div class="glass rec-panel">
+          <h3>実績 <small id="recBadgeCount"></small></h3>
+          <div class="badge-grid" id="recBadges"></div>
+        </div>
+        <div class="glass rec-panel rec-wide">
+          <h3>最近のプレイ</h3>
+          <div class="table-scroll"><table class="rec-table rec-history" id="recHistory"></table></div>
+        </div>
+      </div>
+      <div class="rec-foot">
+        <p>記録はこの端末のブラウザだけに保存されています。別の端末に移すときは、書き出したファイルを読み込んでください。</p>
+        <div class="rec-actions">
+          <button class="btn btn-soft" id="btnExport" type="button">記録を書き出す</button>
+          <button class="btn btn-soft" id="btnImport" type="button">記録を読み込む</button>
+          <button class="link-btn" id="btnReset" type="button">記録をすべて消す</button>
+        </div>
+        <input type="file" id="fileImport" accept="application/json,.json" hidden>
+      </div>
+    </div>
+  </section>
+
+  <!-- きせかえ -->
+  <section class="screen" id="scr-wardrobe" aria-labelledby="wardrobeTitle">
+    <div class="wardrobe-wrap">
+      <header class="screen-head">
+        <button class="btn btn-ghost" type="button" data-back>← もどる <kbd>Esc</kbd></button>
+        <h2 id="wardrobeTitle">きせかえ</h2>
+        <span></span>
+      </header>
+      <div class="wardrobe-body">
+        <div class="glass wardrobe-preview">
+          <div class="wardrobe-chappy" id="wardrobeChappy"></div>
+          <p class="wardrobe-apples" id="wardrobeApples"></p>
+        </div>
+        <div class="wardrobe-lists">
+          <div class="glass rec-panel">
+            <h3>アクセサリー</h3>
+            <div class="item-grid" id="skinGrid"></div>
+          </div>
+          <div class="glass rec-panel">
+            <h3>背景の空</h3>
+            <div class="item-grid" id="skyGrid"></div>
+          </div>
+          <p class="rec-note">りんごを集めると、新しいアイテムが解放されます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- カウントダウン・終了・ウェーブの表示 -->
+<div class="overlay" id="overlay" aria-live="assertive"></div>
+
+<!-- 設定 -->
+<dialog class="modal glass" id="settingsDlg" aria-labelledby="settingsTitle">
+  <form method="dialog">
+    <h2 id="settingsTitle">設定</h2>
+    <h3 class="modal-sub">音</h3>
+    <label class="field"><span>BGM の音量</span><input type="range" id="volBgm" min="0" max="100" step="5"><output id="volBgmOut"></output></label>
+    <label class="field"><span>効果音の音量</span><input type="range" id="volSe" min="0" max="100" step="5"><output id="volSeOut"></output></label>
+    <label class="check"><input type="checkbox" id="chkMute"> 音をすべて消す</label>
+    <h3 class="modal-sub">タイピング</h3>
+    <label class="check"><input type="checkbox" id="chkGuide"> 指ガイド（画面のキーボード）を表示する</label>
+    <label class="check"><input type="checkbox" id="chkRomaji"> ローマ字のガイドを表示する</label>
+    <div class="field field-seg"><span>キーボード配列</span>
+      <div class="seg seg-small" id="segLayout" role="radiogroup" aria-label="キーボード配列">
+        <button type="button" data-v="jis">日本語配列</button>
+        <button type="button" data-v="us">英語配列</button>
+      </div>
+    </div>
+    <div class="field field-seg"><span>文字の大きさ</span>
+      <div class="seg seg-small" id="segFont" role="radiogroup" aria-label="文字の大きさ">
+        <button type="button" data-v="m">標準</button>
+        <button type="button" data-v="l">大きい</button>
+        <button type="button" data-v="xl">特大</button>
+      </div>
+    </div>
+    <h3 class="modal-sub">見た目</h3>
+    <label class="check"><input type="checkbox" id="chk3d"> 3D の背景を使う（重いときはオフにしてください）</label>
+    <label class="check"><input type="checkbox" id="chkReduce"> アニメーションを減らす</label>
+    <div class="modal-actions"><button class="btn btn-primary" value="close">閉じる</button></div>
+  </form>
+</dialog>
+
+<!-- 技術科ことばの一覧 -->
+<dialog class="modal modal-wide glass" id="techDlg" aria-labelledby="techTitle">
+  <form method="dialog">
+    <h2 id="techTitle">技術科ことば 用語一覧</h2>
+    <div class="tech-list" id="techList"></div>
+    <div class="modal-actions"><button class="btn btn-primary" value="close">閉じる</button></div>
+  </form>
+</dialog>
+
+<!-- スマホ・タブレットでの案内 -->
+<div class="mobile-block" id="mobileBlock" hidden>
+  <div class="glass mobile-card">
+    <div class="mobile-chappy" id="mobileChappy"></div>
+    <h2>パソコンで遊んでね</h2>
+    <p>チャッピータイピングは、キーボードを使って遊ぶゲームです。<br>パソコンのブラウザで開いてください。</p>
+  </div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="js/typing.js"></script>
+<script src="data/words-ja.js"></script>
+<script src="data/words-en.js"></script>
+<script src="data/words-tech.js"></script>
+<script src="data/lessons.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/chappy.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scene3d.js"></script>
+<script src="js/keyboard.js"></script>
+<script src="js/session.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/modes/rush.js"></script>
+<script src="js/modes/step.js"></script>
+<script src="js/modes/weak.js"></script>
+<script src="js/modes/free.js"></script>
+<script src="js/modes/cannon.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
