@@ -40,6 +40,19 @@ const MODES = [
 ];
 const modeOf = (id) => MODES.find((m) => m.id === id);
 
+/** Google アナリティクスにイベントを送る（モード名や成績の数字だけ。個人を特定する情報は送らない） */
+function track(name, params) {
+  try { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); } catch (e) { /* 送れなくても続ける */ }
+}
+/** モードの選び方（言語・難しさ・分野・レッスン）を1つの文字列に */
+function variantOf(mode, o) {
+  if (mode === "tech") return `ja:${o.field}`;
+  if (mode === "step") return `${o.lang}:${o.lessonId}`;
+  if (mode === "weak") return o.lang;
+  if (mode === "free") return `${o.lang}:${o.diff}:${o.time}`;
+  return `${o.lang}:${o.diff}`;
+}
+
 let screen = "title";
 let selectedMode = modeOf(settings.mode) ? settings.mode : "rush";
 let game = null;           // いま遊んでいるモード
@@ -568,9 +581,11 @@ function startGame(mode, opts) {
   playCp.setMood("normal");
   game = CT.modes[mode].create(app, opts);
   game.start();
+  track("game_start", { game_mode: mode, game_variant: variantOf(mode, opts) });
 }
 
 function quitGame() {
+  if (game && lastStart) track("game_quit", { game_mode: lastStart.mode, game_variant: variantOf(lastStart.mode, lastStart.opts) });
   if (game) game.stop();
   game = null;
   countdownId++;
@@ -617,6 +632,11 @@ function onFinish(r) {
   const earned = CT.Achievements.check(data, r);
   Store.save();
   const rank = CT.rankOf(r.kpm, r.acc);
+  track("game_finish", {
+    game_mode: r.mode, game_variant: lastStart ? variantOf(r.mode, lastStart.opts) : "",
+    score: r.score, kpm: r.kpm, accuracy: r.acc, rank: rank.letter, new_best: !!isBest,
+  });
+  for (const a of earned) track("unlock_achievement", { achievement_id: a.id });
 
   $("resMode").textContent = resultLabel(r);
 

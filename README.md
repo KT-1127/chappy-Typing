@@ -3,11 +3,13 @@
 チャッピーと一緒にりんごを集めながら、タイピングが上達するブラウザゲームです。
 日本語（ローマ字入力）・英語・中学校技術科の用語に対応しています。
 
-![チャッピータイピング](assets/og.png)
+![チャッピータイピング](top2.png)
+
+**▶ 遊ぶ：https://kt-1127.github.io/chappy-Typing/**
 
 ## 遊び方
 
-`index.html` をブラウザで開くだけで遊べます（インストールやサーバーは不要です）。
+上の URL を開くか、`index.html` をブラウザで開くだけで遊べます（インストールやサーバーは不要です）。
 パソコンのキーボードで遊んでください（スマートフォンには対応していません）。
 
 ## モード
@@ -49,7 +51,8 @@ js/achievements.js   実績・きせかえの解放条件
 js/main.js           画面の切り替え・演出・結果・記録・設定
 data/                問題データ（日本語・英語・技術科ことば・レッスン）
 assets/chappy/       チャッピーのパーツ画像
-assets/og.png        共有用の画像
+assets/og.png        SNS 共有用の画像（1200×630）
+top2.png             紹介用のバナー画像
 vendor/three.min.js  Three.js r149（MIT ライセンス）
 ```
 
@@ -58,7 +61,18 @@ vendor/three.min.js  Three.js r149（MIT ライセンス）
 1. このフォルダの中身をリポジトリに入れて push します
 2. リポジトリの Settings → Pages で、ブランチのルート（`/`）を公開元に選びます
 
-共有したときに画像が出るように、公開後は `index.html` の `og:image` を `https://（ユーザー名）.github.io/（リポジトリ名）/assets/og.png` のような完全な URL に書きかえてください。
+公開先：https://kt-1127.github.io/chappy-Typing/ （`index.html` の `og:url`・`og:image`・`canonical` もこの URL にしています）
+
+## アクセス解析
+
+Google アナリティクス 4（KT-Tech-Lab 共通の ID）を入れています。ページの表示に加えて、次のイベントを送ります。送るのはモード名と成績の数字だけで、名前などの個人情報は送りません。
+
+| イベント | 内容 |
+|---|---|
+| `game_start` | ゲーム開始（`game_mode`、`game_variant`＝言語・難しさ・分野など） |
+| `game_finish` | ゲーム終了（上の2つに加えて `score`、`kpm`、`accuracy`、`rank`、`new_best`） |
+| `game_quit` | Esc で途中でやめた |
+| `unlock_achievement` | 実績を取った（`achievement_id`） |
 
 ## ライセンス
 
